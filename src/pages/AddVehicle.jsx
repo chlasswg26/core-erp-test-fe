@@ -94,19 +94,21 @@ const AddVehiclePage = () => {
             {errors.vehicleBrand && <p className="text-red-500 text-xs">{errors.vehicleBrand.message}</p>}
           </div>
           <div>
-            <label className="block text-gray-600 text-sm font-medium mb-1">Warna Kendaraan</label>
+            <label class="block text-gray-600 text-sm font-medium mb-1">Warna Kendaraan</label>
             <select
               name="vehicleColor"
               {...register("vehicleColor", { required: "Warna kendaraan wajib diisi" })}
               className="w-full border border-gray-300 rounded-lg p-2 text-gray-800"
             >
-              <option>Pilih warna</option>
+              <option value="">Pilih warna</option>
               <option value="Merah">Merah</option>
               <option value="Hitam">Hitam</option>
               <option value="Biru">Biru</option>
               <option value="Abu-Abu">Abu-Abu</option>
             </select>
-            {errors.vehicleColor && <p className="text-red-500 text-xs">{errors.vehicleColor.message}</p>}
+            {errors?.vehicleColor && (
+              <p className="text-red-500 text-xs">{errors.vehicleColor.message}</p>
+            )}
           </div>
           <div className="col-span-2">
             <label className="block text-gray-600 text-sm font-medium mb-1">Alamat Pemilik Kendaraan</label>

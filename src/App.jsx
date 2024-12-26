@@ -6,35 +6,61 @@ import { useNavigate } from "react-router";
 const App = () => {
   const { register, handleSubmit } = useForm();
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
   let navigate = useNavigate();
 
   const fetchData = async (filters) => {
     try {
-      setLoading(true);
-      let paramsData = {}
-      if (filters?.registration_number) paramsData = {
-        ...paramsData,
-        registration_number: filters?.registration_number
-      }
-      if (filters?.owner_name) paramsData = {
-        ...paramsData,
-        owner_name: filters?.owner_name
-      }
-      const response = await axios.get("https://datakendaraanapi-production-3037.up.railway.app/api/kendaraan", {
-        params: paramsData,
-      });
+      let paramsData = {};
+      if (filters?.registration_number)
+        paramsData = {
+          ...paramsData,
+          registration_number: filters?.registration_number,
+        };
+      if (filters?.owner_name)
+        paramsData = {
+          ...paramsData,
+          owner_name: filters?.owner_name,
+        };
+      const response = await axios.get(
+        "https://datakendaraanapi-production-3037.up.railway.app/api/kendaraan",
+        {
+          params: paramsData,
+        }
+      );
       setData(response.data?.response_data);
     } catch (error) {
       console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
+  const onDeleteData = async () => {
+    try {
+      const response = await axios.delete(
+        `https://datakendaraanapi-production-3037.up.railway.app/api/kendaraan/${selectedId}`,
+      );
+
+      if (response.data?.success) {
+        alert("Data berhasil dihapus");
+        setShowModal(false);
+        setSelectedId(null);
+        await fetchData();
+      }
+    } catch (error) {
+      console.error("Error deleting data:", error);
+      alert(`Failed to delete data: ${error?.message}`);
+    }
+  };
+
+  const confirmDelete = (registrationNumber) => {
+    setSelectedId(registrationNumber);
+    setShowModal(true);
+  };
+
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -71,7 +97,7 @@ const App = () => {
           type="submit"
           className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4 hover:bg-blue-600"
         >
-          {loading ? "Loading..." : "Search"}
+          Search
         </button>
       </form>
 
@@ -106,7 +132,9 @@ const App = () => {
                 <td className="border border-gray-300 px-4 py-2">
                   {item.registration_number}
                 </td>
-                <td className="border border-gray-300 px-4 py-2">{item.owner_name}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {item.owner_name}
+                </td>
                 <td className="border border-gray-300 px-4 py-2">{item.brand}</td>
                 <td className="border border-gray-300 px-4 py-2">
                   {item.production_year}
@@ -133,13 +161,19 @@ const App = () => {
                   >
                     Edit
                   </button>
+                  <button
+                    onClick={() => confirmDelete(item.registration_number)}
+                    className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 mr-2"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
               <td
-                colSpan="6"
+                colSpan="9"
                 className="border border-gray-300 px-4 py-2 text-center"
               >
                 No data found
@@ -148,6 +182,30 @@ const App = () => {
           )}
         </tbody>
       </table>
+
+      {/* Modal Confirmation */}
+      {showModal && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-md shadow-md">
+            <h2 className="text-lg font-bold mb-4">Konfirmasi Aksi</h2>
+            <p>Anda yakin ingin menghapus data kendaraan ini?</p>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => setShowModal(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 mr-2"
+              >
+                Batal
+              </button>
+              <button
+                onClick={onDeleteData}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+              >
+                Konfirmasi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
