@@ -38,7 +38,12 @@ const App = () => {
   const onDeleteData = async () => {
     try {
       const response = await axios.delete(
-        `https://datakendaraanapi-production-3037.up.railway.app/api/kendaraan/${selectedId}`,
+        "https://datakendaraanapi-production-3037.up.railway.app/api/kendaraan",
+        {
+          params: {
+            registration_number: selectedId,
+          },
+        }
       );
 
       if (response.data?.success) {
